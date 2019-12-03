@@ -39,7 +39,7 @@ public class JwtVerifier {
     // object caches the retrieved keys to speed up subsequent look-ups and can
     // also handle key-rollover
     JWKSource<SecurityContext> keySource =
-        new RemoteJWKSet<>(new URL("http://" + issuer + "/.well-known/jwks.json"));
+        new RemoteJWKSet<>(new URL(issuer + ".well-known/jwks.json"));
 
     // The expected JWS algorithm of the access tokens (agreed out-of-band)
     JWSAlgorithm expectedJWSAlg = JWSAlgorithm.RS256;
@@ -59,7 +59,7 @@ public class JwtVerifier {
 
     // Define claims that must be present in all access tokens
     Set<String> requiredClaimKeys =
-        new HashSet<>(Arrays.asList("sub", "iat", "exp", "scp", "cid", "jti"));
+        new HashSet<>(Arrays.asList("sub", "iat", "exp"));
 
     JWTClaimsSetVerifier<SecurityContext> claimsSetVerifier =
         new DefaultJWTClaimsVerifier<>(requiredClaimValues, requiredClaimKeys);
