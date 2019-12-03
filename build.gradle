@@ -31,6 +31,7 @@ dependencies {
     implementation "io.micronaut:micronaut-discovery-client"
     implementation "io.micronaut:micronaut-http-server-netty"
     implementation "javax.annotation:javax.annotation-api"
+    implementation 'com.nimbusds:nimbus-jose-jwt:8.2.1'
     runtimeOnly "ch.qos.logback:logback-classic:1.2.3"
     testAnnotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
     testAnnotationProcessor "io.micronaut:micronaut-inject-java"

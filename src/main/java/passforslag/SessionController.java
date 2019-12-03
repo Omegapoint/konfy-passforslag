@@ -1,5 +1,6 @@
 package passforslag;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import io.micronaut.core.convert.exceptions.ConversionErrorException;
 import io.micronaut.discovery.exceptions.NoAvailableServiceException;
 import io.micronaut.http.HttpRequest;
@@ -8,8 +9,10 @@ import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Error;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Header;
 import io.micronaut.http.annotation.Patch;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.web.router.exceptions.UnsatisfiedRouteException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,9 +25,11 @@ import javax.validation.ValidationException;
 @Controller("/pass")
 public class SessionController {
 
-  private CommunicationsClient comClient;
-  private static Map<UUID, Persisted<Session>> allSessions = new HashMap<>();
-  private static Map<UUID, Persisted<Session>> acceptedSessions = new HashMap<>();
+  private static final Map<UUID, Persisted<Session>> allSessions = new HashMap<>();
+  private static final Map<UUID, Persisted<Session>> acceptedSessions = new HashMap<>();
+
+  private final JwtVerifier jwtVerifier;
+  private final CommunicationsClient comClient;
 
   static {
     UUID id = UUID.fromString("deadbeef-0401-4958-ae1b-365ca965b36d");
@@ -39,12 +44,16 @@ public class SessionController {
     allSessions.put(id, new Persisted<>(id, session));
   }
 
-  SessionController(CommunicationsClient comClient) {
+  SessionController(JwtVerifier jwtVerifier, CommunicationsClient comClient) {
+    this.jwtVerifier = jwtVerifier;
     this.comClient = comClient;
   }
 
   @Get
-  public HttpResponse<Collection<Persisted<Session>>> getAllSessionsRequest() {
+  public HttpResponse<Collection<Persisted<Session>>> getAllSessionsRequest(
+      @Header("Authorization") String authzHeader) {
+    JWTClaimsSet jwtClaimsSet = jwtVerifier.verifyAuthorizationHeader(authzHeader);
+    // TODO: Check roles
     return HttpResponse.ok(allSessions.values());
   }
 
@@ -77,6 +86,7 @@ public class SessionController {
     return HttpResponse.ok(acceptedSessions.values());
   }
 
+  // Micronauts exception to response code translation leaves a lot to be desired. So I rolled my own...
   @Error
   public HttpResponse<String> error(HttpRequest r, Throwable e) {
 
@@ -86,13 +96,15 @@ public class SessionController {
     }
 
     if (e instanceof ValidationException || e instanceof ConversionErrorException) {
-      return HttpResponse.badRequest(e.getMessage());
+      return HttpResponse.badRequest();
     } else if (e instanceof NotFoundException) {
       return HttpResponse.notFound();
+    } else if (e instanceof UnsatisfiedRouteException || e instanceof UnauthorizedException) {
+      return HttpResponse.unauthorized();
     }
 
     e.printStackTrace();
-    return HttpResponse.serverError(e.getMessage());
+    return HttpResponse.serverError();
   }
 
   private Persisted<Session> persist(Session pass) {

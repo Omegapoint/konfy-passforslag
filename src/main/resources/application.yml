@@ -1,9 +1,11 @@
----
 micronaut:
   application:
     name: passforslag
 
----
+access-token:
+  issuer: "dev-uq-nu76u.eu.auth0.com"
+  audience: "konfy.se"
+
 consul:
   client:
     registration:
