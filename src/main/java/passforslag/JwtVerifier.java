@@ -54,7 +54,6 @@ public class JwtVerifier {
     // Required claim - value pairs (issuer and audience must be correct)
     JWTClaimsSet requiredClaimValues = new JWTClaimsSet.Builder()
         .issuer(issuer)
-        .audience(audience)
         .build();
 
     // Define claims that must be present in all access tokens
@@ -62,7 +61,7 @@ public class JwtVerifier {
         new HashSet<>(Arrays.asList("sub", "iat", "exp"));
 
     JWTClaimsSetVerifier<SecurityContext> claimsSetVerifier =
-        new DefaultJWTClaimsVerifier<>(requiredClaimValues, requiredClaimKeys);
+        new DefaultJWTClaimsVerifier<>(audience, requiredClaimValues, requiredClaimKeys);
 
     // Set the JWT constraints
     jwtProcessor.setJWTClaimsSetVerifier(claimsSetVerifier);

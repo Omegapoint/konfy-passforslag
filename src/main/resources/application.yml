@@ -3,8 +3,8 @@ micronaut:
     name: passforslag
 
 access-token:
-  issuer: "https://dev-uq-nu76u.eu.auth0.com/"
-  audience: "w0LAP0uNFXZBNUlKp4YmLofmzCt2s4UD"
+  issuer: "https://op-ume.eu.auth0.com/"
+  audience: "https://api.konfy.se"
 
 consul:
   client:
