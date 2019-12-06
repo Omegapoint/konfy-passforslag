@@ -1,6 +1,17 @@
 micronaut:
   application:
     name: passforslag
+  security:
+    enabled: true
+    token:
+      roles-name: "permissions"
+      jwt:
+        enabled: true
+        signatures:
+          jwks:
+            auth0:
+              url: "https://op-ume.eu.auth0.com/.well-known/jwks.json"
+# Questions: How do we configure the above to verify the iss and aud claims we require?
 
 access-token:
   issuer: "https://op-ume.eu.auth0.com/"
@@ -9,7 +20,7 @@ access-token:
 consul:
   client:
     registration:
-      ip-addr: 172.16.13.14
+      ip-addr: 172.16.13.77
       prefer-ip-address: true
       enabled: true
     defaultZone: "${CONSUL_HOST:127.0.0.1}:${CONSUL_PORT:8500}"

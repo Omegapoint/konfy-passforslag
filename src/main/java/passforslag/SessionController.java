@@ -12,6 +12,8 @@ import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Header;
 import io.micronaut.http.annotation.Patch;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.security.annotation.Secured;
+import io.micronaut.security.rules.SecurityRule;
 import io.micronaut.web.router.exceptions.UnsatisfiedRouteException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import javax.validation.Valid;
 import javax.validation.ValidationException;
 
 @Controller("/pass")
+@Secured(SecurityRule.IS_AUTHENTICATED)
 public class SessionController {
 
   private static final Map<UUID, Persisted<Session>> allSessions = new HashMap<>();
@@ -50,9 +53,10 @@ public class SessionController {
   }
 
   @Get
+  @Secured({"admin"})
   public HttpResponse<Collection<Persisted<Session>>> getAllSessionsRequest(
       @Header("Authorization") String authzHeader) {
-    JWTClaimsSet jwtClaimsSet = jwtVerifier.verifyAuthorizationHeader(authzHeader);
+    // JWTClaimsSet jwtClaimsSet = jwtVerifier.verifyAuthorizationHeader(authzHeader);
     // TODO: Check roles
     return HttpResponse.ok(allSessions.values());
   }
@@ -67,6 +71,7 @@ public class SessionController {
   }
 
   @Get("/{id}")
+  @Secured(SecurityRule.IS_ANONYMOUS)
   public HttpResponse<Persisted<Session>> getSessionRequest(UUID id) {
     return HttpResponse.ok(getPersistedSession(id));
   }
